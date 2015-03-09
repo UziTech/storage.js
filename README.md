@@ -5,7 +5,7 @@ localStorage for objects
 A local storage option that allows storing and retrieving any object including functions, undefineds, regexps, dates, string, numbers
 
 # Usage
-
+```javascript
 storage.setItem("a", {this:1});
 //storage.a === {"this": 1}
 
@@ -31,3 +31,4 @@ storage.length;
 
 storage.key(i);
 //returns the ith key name
+```
