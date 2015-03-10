@@ -16,12 +16,12 @@ Object.defineProperties(window.storage, {
 				value = obj;
 			}
 			storage.define(item);
-			return localStorage.setItem(item, this.stringify(value));
+			return localStorage.setItem(item, storage.stringify(value));
 		}
 	},
 	getItem: {
 		value: function (item) {
-			return this.parse(localStorage.getItem(item));
+			return storage.parse(localStorage.getItem(item));
 		}
 	},
 	removeItem: {
@@ -31,6 +31,7 @@ Object.defineProperties(window.storage, {
 	},
 	clear: {
 		value: function () {
+			//TODO: remove defined properties from storage
 			return localStorage.clear();
 		}
 	},
@@ -57,14 +58,23 @@ Object.defineProperties(window.storage, {
 	stringify: {
 		value: function (obj) {
 			function ToString(obj, recursiveCall) {
-				//TODO: better type to string to reduce overlap with actual strings
-				//TODO: test circulation
+				//TODO: object circulation
 				var str;
 				if (typeof obj === "object") {
 					if (obj instanceof Date) {
 						str = "DATE:" + obj.toString();
 					} else if (obj instanceof RegExp) {
 						str = "REGEXP:" + obj.toString();
+					} else if (obj instanceof Array) {
+						var temp = [];
+						for (var i = 0; i < obj.length; i++) {
+							temp.push(ToString(obj[i], true));
+						}
+						if (!recursiveCall) {
+							str = JSON.stringify(temp);
+						} else {
+							str = temp;
+						}
 					} else {
 						var temp = {};
 						for (var i in obj) {
@@ -92,33 +102,48 @@ Object.defineProperties(window.storage, {
 	},
 	parse: {
 		value: function (str) {
-			//TODO: better detection of types
-			var obj = JSON.parse(str);
-			for (var i in obj) {
-				if (typeof obj[i] === "string") {
-					if (obj[i].indexOf("DATE:") === 0) {
-						var date = new Date(obj[i].substring(5));
+			function ToObject(str, recursiveCall) {
+				var obj;
+				if (!recursiveCall) {
+					obj = JSON.parse(str);
+				} else {
+					obj = str;
+				}
+				if (typeof obj === "string") {
+					if (obj.indexOf("DATE:") === 0) {
+						var date = new Date(obj.substring(5));
 						if (!isNaN(date.getTime())) {
-							obj[i] = date;
+							obj = date;
 						}
-					} else if (obj[i].indexOf("REGEXP:") === 0) {
-						var matches = obj[i].match(/^REGEXP:\/((?:\\\/|[^/])+)\/([gimy]*)$/);
+					} else if (obj.indexOf("REGEXP:") === 0) {
+						var matches = obj.match(/^REGEXP:\/((?:\\\/|[^/])+)\/([gimy]*)$/);
 						if (matches !== null) {
-							obj[i] = new RegExp(matches[1], matches[2]);
+							obj = new RegExp(matches[1], matches[2]);
 						}
-					} else if (obj[i] === "UNDEFINED:") {
-						obj[i] = undefined;
-					} else if (obj[i].indexOf("FUNCTION:") === 0) {
-						var matches = obj[i].match(/^FUNCTION:function[^(]*\(([^)]*)\)\s*{([\s\S]*)}$/);
+					} else if (obj === "UNDEFINED:") {
+						obj = undefined;
+					} else if (obj.indexOf("FUNCTION:") === 0) {
+						var matches = obj.match(/^FUNCTION:function[^(]*\(([^)]*)\)\s*{([\s\S]*)}$/);
 						if (matches !== null) {
 							var args = matches[1].replace(/[\s/*]/g, "");
 							var body = matches[2].replace(/\r?\n|\r/g, "");
-							obj[i] = eval("new Function(\"" + args.split(", ").join("\", \"") + "\", \"" + body + "\")");
+							obj = eval("new Function(\"" + args.split(", ").join("\", \"") + "\", \"" + body + "\")");
+						}
+					}
+				} else if (typeof obj === "object") {
+					if (obj instanceof Array) {
+						for (var i = 0; i < obj.length; i++) {
+							obj[i] = ToObject(obj[i], true);
+						}
+					} else {
+						for (var i in obj) {
+							obj[i] = ToObject(obj[i], true);
 						}
 					}
 				}
+				return obj;
 			}
-			return obj;
+			return ToObject(str);
 		}
 	},
 	length: {
