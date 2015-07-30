@@ -9,14 +9,27 @@ A local storage option that allows storing and retrieving any object including f
 storage.setItem("a", {this:1});
 //storage.a === {"this": 1}
 
-storage.setItem("a", "that", 3);
-//storage.a === {"this": 1, "that": 3}
+storage.a.this
+//1
 
-storage.a.this = 3;
+storage.a.this = 2;
 //does not work
+//storage.a === {"this": 1}
 
-storage.a = {"this": 1, "that": 2};
-//storage.a === {"this": 1, "that": 2} only works if "a" was already in local storage
+var a = storage.a;
+a.this = 2;
+storage.a = a;
+//does work
+//storage.a === {"this": 2}
+
+storage.setItem("a", "this", 3);
+//storage.a === {"this": 3}
+
+storage.setItem("a", "that", 3);
+//storage.a === {"this": 3, "that": 3}
+
+storage.a = {this: 1, that: 2};
+//only works if "a" was already in local storage
 
 storage.getItem("a");
 storage.a;
@@ -31,4 +44,7 @@ storage.length;
 
 storage.key(i);
 //returns the ith key name
+
+storage[storage.key(i)];
+//returns the ith keys object
 ```
