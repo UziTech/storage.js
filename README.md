@@ -16,7 +16,7 @@ storage.a.this = 3;
 //does not work
 
 storage.a = {"this": 1, "that": 2};
-//storage.a === {"this" : 3} only works if "a" was already in local storage
+//storage.a === {"this": 1, "that": 2} only works if "a" was already in local storage
 
 storage.getItem("a");
 storage.a;
