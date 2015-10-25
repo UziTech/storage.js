@@ -1,7 +1,7 @@
 function test(name, value, pass) {
 	var stringify = storage.stringify(value);
 	var parse = storage.parse(stringify);
-	console.log(name);
+	console.log("%c" + name.toUpperCase(), "color: #00f");
 	console.log("value: ", value);
 	console.log("stringify: ", stringify);
 	console.log("parse: ", parse);
