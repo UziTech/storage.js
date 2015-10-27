@@ -25,7 +25,8 @@ var tests = {
 	function: function (a, b) {
 		return a + b;
 	},
-	escape: {$date: 9271384}
+	escape: {$date: 9271384},
+	null: null
 };
 
 test("string", tests.string, function (test, string, result) {
@@ -100,4 +101,7 @@ test("escape", tests.escape, function (test, string, result) {
 	} catch (ex) {
 		return false;
 	}
+});
+test("null", tests.null, function (test, string, result) {
+	return "null" === string && test === result;
 });
