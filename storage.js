@@ -194,10 +194,16 @@
 						return {$function: obj.toString()};
 					},
 					fromJSONValue: function (obj) {
-						var matches = obj.$function.match(/^function[^(]*\(([^)]*)\)\s*{([\s\S]*)}$/);
-						var args = matches[1].replace(/[\s/*]/g, "");
-						var body = matches[2].replace(/\r?\n|\r/g, "");
-						return eval("new Function(\"" + args.split(", ").join("\", \"") + "\", \"" + body + "\")");
+						var matches = obj.$function.match(/^function\s?(\w*)\(([^)]*)\)\s*{([\s\S]*)}$/);
+						var name = matches[1];
+						var args = matches[2];
+						var body = matches[3];
+						//var arr = args.split(",");
+						//arr.push(body);
+						//return Function.apply(null, arr);
+						
+						//allow named functions
+						return eval("(function(){ return function " + name + "(" + args + "){ " + body + " }; })()");
 					}
 				},
 				escape: {// Function
@@ -299,21 +305,4 @@
 		storage.define(i);
 	}
 //TODO: set storage.item = {test:""}; with object.observe?
-
-	storage.test = {
-		string: "hi",
-		array: [1, 2, 3],
-		object: {1: 1, 2: 2, 3: 3},
-		number: 1,
-		nan: NaN,
-		infinity: Infinity,
-		"-Infinity": -Infinity,
-		date: new Date(),
-		regexp: /i/g,
-		undefined: undefined,
-		function: function (a, b) {
-			return a + b;
-		},
-		escape: {$date: 9271384}
-	};
 })(window);

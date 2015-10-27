@@ -5,34 +5,19 @@ function test(name, value, pass) {
 	console.log("value: ", value);
 	console.log("stringify: ", stringify);
 	console.log("parse: ", parse);
-	if (pass(value, stringify, parse)) {
-		console.log("%cPASS", "color: #0f0");
-	} else {
-		console.error("FAIL");
+	if (typeof pass === "function") {
+		if (pass(value, stringify, parse)) {
+			console.log("%cPASS", "color: #0f0");
+		} else {
+			console.error("FAIL");
+		}
 	}
 }
-var tests = {
-	string: "hi",
-	array: [1, 2, 3],
-	object: {1: 1, 2: 2, 3: 3},
-	number: 1,
-	nan: NaN,
-	infinity: Infinity,
-	"-infinity": -Infinity,
-	date: new Date(),
-	regexp: /i/g,
-	undefined: undefined,
-	function: function (a, b) {
-		return a + b;
-	},
-	escape: {$date: 9271384},
-	null: null
-};
 
-test("string", tests.string, function (test, string, result) {
+test("string", "string", function (test, string, result) {
 	return JSON.stringify(test) === string && test === result;
 });
-test("array", tests.array, function (test, string, result) {
+test("array", [1, 2, 3], function (test, string, result) {
 	var pass = true;
 	if (JSON.stringify(test) !== string) {
 		pass = false;
@@ -47,7 +32,7 @@ test("array", tests.array, function (test, string, result) {
 	}
 	return pass;
 });
-test("object", tests.object, function (test, string, result) {
+test("object", {1: 1, 2: 2, 3: 3}, function (test, string, result) {
 	var pass = true;
 	if (JSON.stringify(test) !== string) {
 		pass = false;
@@ -59,39 +44,53 @@ test("object", tests.object, function (test, string, result) {
 	}
 	return pass;
 });
-test("number", tests.number, function (test, string, result) {
+test("number", 1, function (test, string, result) {
 	return test === +string && test === result;
 });
-test("nan", tests.nan, function (test, string, result) {
+test("nan", NaN, function (test, string, result) {
 	return JSON.stringify({$infnan: 0}) === string && typeof result === "number" && isNaN(result);
 });
-test("infinity", tests.infinity, function (test, string, result) {
+test("infinity", Infinity, function (test, string, result) {
 	return JSON.stringify({$infnan: 1}) === string && test === result;
 });
-test("-infinity", tests["-infinity"], function (test, string, result) {
+test("-infinity", -Infinity, function (test, string, result) {
 	return JSON.stringify({$infnan: -1}) === string && test === result;
 });
-test("date", tests.date, function (test, string, result) {
+test("date", new Date(), function (test, string, result) {
 	try {
 		return JSON.stringify({$date: test.getTime()}) === string && test.getTime() === result.getTime();
 	} catch (ex) {
 		return false;
 	}
 });
-test("regexp", tests.regexp, function (test, string, result) {
+test("regexp", /i/g, function (test, string, result) {
 	return JSON.stringify({$regexp: test.toString()}) === string && test.toString() === result.toString();
 });
-test("undefined", tests.undefined, function (test, string, result) {
+test("undefined", undefined, function (test, string, result) {
 	return JSON.stringify({$undefined: 0}) === string && typeof result === "undefined";
 });
-test("function", tests.function, function (test, string, result) {
+test("named function", function diff_1(a, b) {
+	if (a < b) {
+		return b - a;
+	}
+	return a - b;
+}, function (test, string, result) {
+	try {
+		return test.name === result.name && JSON.stringify({$function: test.toString()}) === string && result(1, 3) === 2;
+	} catch (ex) {
+		return false;
+	}
+});
+test("anonymous function", function (a, b) {
+	return a + b;
+}, function (test, string, result) {
 	try {
 		return JSON.stringify({$function: test.toString()}) === string && result(1, 2) === 3;
 	} catch (ex) {
 		return false;
 	}
 });
-test("escape", tests.escape, function (test, string, result) {
+test("escape", {$date: 9271384}, function (test, string, result) {
 	try {
 		var newObj = {};
 		for (var i in test) {
@@ -102,6 +101,6 @@ test("escape", tests.escape, function (test, string, result) {
 		return false;
 	}
 });
-test("null", tests.null, function (test, string, result) {
+test("null", null, function (test, string, result) {
 	return "null" === string && test === result;
 });
