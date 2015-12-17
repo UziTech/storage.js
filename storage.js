@@ -1,7 +1,7 @@
 /*
  * Author: Tony Brix, https://tony.brix.ninja
  * License: MIT
- * Version: 1.0.0
+ * Version: 1.0.1
  */
 ;
 (function (window, undefined) {
@@ -80,9 +80,11 @@
 				var loopFinished = false;
 				function detect(obj) {
 					if (obj && typeof obj === "object") {
-						if (seenObjects.includes(obj)) {
-							loopStarter = obj;
-							return true;
+						for (var i = 0; i < seenObjects.length; i++) {
+							if (obj === seenObjects[i]) {
+								loopStarter = obj;
+								return true;
+							}
 						}
 						seenObjects.push(obj);
 						for (var key in obj) {
@@ -392,7 +394,7 @@
 				if (str.charAt(str.length - 2) === '=')
 					len--;
 			}
-			var arr = new Uint8Array(new ArrayBuffer(len));
+			var arr = new Uint8Array(len);
 
 			var one = null;
 			var two = null;

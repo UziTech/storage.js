@@ -95,7 +95,7 @@ test("escape", {$date: 9271384}, function (test, string, result) {
 test("null", null, function (test, string, result) {
 	return "null" === string && test === result;
 });
-test("binary", new TextEncoder("utf-8").encode("Hello"), function (test, string, result) {
+test("binary", new Uint8Array([72,101,108,108,111]), function (test, string, result) {
 	var pass = true;
 	if (JSON.stringify({$binary: window.storage.base64.encode(test)}) !== string) {
 		pass = false;
