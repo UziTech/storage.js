@@ -56,6 +56,11 @@
 				return localStorage.key(key);
 			}
 		},
+		value: {
+			value: function (key) {
+				return window.storage.getItem(localStorage.key(key));
+			}
+		},
 		define: {
 			value: function (item) {
 				if (!window.storage.hasOwnProperty(item)) {

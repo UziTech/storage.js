@@ -48,6 +48,7 @@ storage.length;
 storage.key(i);
 //returns the ith key name
 
+storage.value(i);
 storage[storage.key(i)];
 //returns the ith keys object
 ```
