@@ -4,28 +4,27 @@
  * Version: 1.0.1
  */
 ;
-(function (window, undefined) {
+(function (window) {
 	window.storage = {};
 	Object.defineProperties(window.storage, {
 		setItem: {
 			value: function (item, value) {
-				var args = arguments;
-				if (args.length > 2) {
+				if (arguments.length > 2) {
 					var obj = window.storage.getItem(item) || {};
 					var next = obj;
 					if (next === null || typeof next !== "object") {
 						throw "'" + item + "' is not an object";
 					}
-					for (var i = 1; i < args.length - 2; i++) {
-						if (!next.hasOwnProperty(args[i])) {
-							next[args[i]] = {};
+					for (var i = 1; i < arguments.length - 2; i++) {
+						if (!next.hasOwnProperty(arguments[i])) {
+							next[arguments[i]] = {};
 						}
-						next = next[args[i]];
+						next = next[arguments[i]];
 						if (next === null || typeof next !== "object") {
-							throw "'" + args[i] + "' is not an object";
+							throw "'" + arguments[i] + "' is not an object";
 						}
 					}
-					next[args[args.length - 2]] = args[args.length - 1];
+					next[arguments[arguments.length - 2]] = arguments[arguments.length - 1];
 					value = obj;
 				}
 				window.storage.define(item);
@@ -34,12 +33,48 @@
 		},
 		getItem: {
 			value: function (item) {
-				return window.storage.parse(localStorage.getItem(item));
+				var obj = window.storage.parse(localStorage.getItem(item));
+				if (arguments.length > 1) {
+					var next = obj;
+					if (next === null || typeof next !== "object") {
+						throw "'" + item + "' is not an object";
+					}
+					for (var i = 1; i < arguments.length - 1; i++) {
+						if (!next.hasOwnProperty(arguments[i])) {
+							return;
+						}
+						next = next[arguments[i]];
+						if (next === null || typeof next !== "object") {
+							throw "'" + arguments[i] + "' is not an object";
+						}
+					}
+					next = next[arguments[arguments.length - 1]];
+					obj = next;
+				}
+				return obj;
 			}
 		},
 		removeItem: {
 			value: function (item) {
-				return localStorage.removeItem(item);
+				if (arguments.length > 1) {
+					var args = Array.apply(null, arguments);
+					var lastItem = args.pop();
+					var obj = window.storage.getItem.apply(null, args);
+					if (typeof obj === "undefined") {
+						return;
+					}
+					if (obj === null || typeof obj !== "object") {
+						throw "'" + args[args.length - 1] + "' is not an object";
+					}
+					if (!obj.hasOwnProperty(lastItem)) {
+						return;
+					}
+					delete obj[lastItem];
+					args.push(obj);
+					window.storage.setItem.apply(null, args);
+				} else {
+					return localStorage.removeItem(item);
+				}
 			}
 		},
 		clear: {
@@ -77,12 +112,13 @@
 			}
 		},
 		isCyclic: {
-			//modified from http://blog.vjeux.com/2011/javascript/cyclic-object-detection.html
+			// modified from http://blog.vjeux.com/2011/javascript/cyclic-object-detection.html
 			value: function (obj) {
 				var seenObjects = [];
 				var loopStarter;
 				var keyString = "";
 				var loopFinished = false;
+
 				function detect(obj) {
 					if (obj && typeof obj === "object") {
 						for (var i = 0; i < seenObjects.length; i++) {
@@ -114,69 +150,82 @@
 				return cyclic;
 			}
 		},
-		//modified from https://www.meteor.com/ejson
+		// modified from https://www.meteor.com/ejson
 		converters: {
 			value: {
-				date: {// Date
+				date: {
+					// Date
 					matchJSONValue: function (obj) {
-						return obj.hasOwnProperty('$date') && Object.keys(obj).length === 1;
+						return obj.hasOwnProperty("$date") && Object.keys(obj).length === 1;
 					},
 					matchObject: function (obj) {
 						return obj instanceof Date;
 					},
 					toJSONValue: function (obj) {
-						return {$date: obj.getTime()};
+						return {
+							$date: obj.getTime()
+						};
 					},
 					fromJSONValue: function (obj) {
 						return new Date(obj.$date);
 					}
 				},
-				regexp: {// RegExp
+				regexp: {
+					// RegExp
 					matchJSONValue: function (obj) {
-						return obj.hasOwnProperty('$regexp') && Object.keys(obj).length === 1;
+						return obj.hasOwnProperty("$regexp") && Object.keys(obj).length === 1;
 					},
 					matchObject: function (obj) {
 						return obj instanceof RegExp;
 					},
 					toJSONValue: function (obj) {
-						return {$regexp: obj.toString()};
+						return {
+							$regexp: obj.toString()
+						};
 					},
 					fromJSONValue: function (obj) {
 						var matches = obj.$regexp.match(/^\/((?:\\\/|[^/])+)\/([gimy]*)$/);
 						return new RegExp(matches[1], matches[2]);
 					}
 				},
-				binary: {// Binary
+				binary: {
+					// Binary
 					matchJSONValue: function (obj) {
-						return obj.hasOwnProperty('$binary') && Object.keys(obj).length === 1;
+						return obj.hasOwnProperty("$binary") && Object.keys(obj).length === 1;
 					},
 					matchObject: function (obj) {
-						return typeof window.Uint8Array !== 'undefined' && obj instanceof window.Uint8Array || (obj && obj.hasOwnProperty('$Uint8ArrayPolyfill'));
+						return typeof window.Uint8Array !== "undefined" && obj instanceof window.Uint8Array || (obj && obj.hasOwnProperty("$Uint8ArrayPolyfill"));
 					},
 					toJSONValue: function (obj) {
-						return {$binary: window.storage.base64.encode(obj)};
+						return {
+							$binary: window.storage.base64.encode(obj)
+						};
 					},
 					fromJSONValue: function (obj) {
 						return window.storage.base64.decode(obj.$binary);
 					}
 				},
-				undefined: {// Undefined
+				undefinedObj: {
+					// Undefined
 					matchJSONValue: function (obj) {
-						return obj.hasOwnProperty('$undefined') && Object.keys(obj).length === 1;
+						return obj.hasOwnProperty("$undefined") && Object.keys(obj).length === 1;
 					},
 					matchObject: function (obj) {
 						return typeof obj === "undefined";
 					},
 					toJSONValue: function () {
-						return {$undefined: 0};
+						return {
+							$undefined: 0
+						};
 					},
 					fromJSONValue: function () {
 						return;
 					}
 				},
-				infnan: {// NaN, Infinity, -Infinity
+				infnan: {
+					// NaN, Infinity, -Infinity
 					matchJSONValue: function (obj) {
-						return obj.hasOwnProperty('$infnan') && Object.keys(obj).length === 1;
+						return obj.hasOwnProperty("$infnan") && Object.keys(obj).length === 1;
 					},
 					matchObject: function (obj) {
 						return (typeof obj === "number" && isNaN(obj)) || obj === window.Infinity || obj === -window.Infinity;
@@ -190,38 +239,44 @@
 						} else {
 							sign = 0;
 						}
-						return {$infnan: sign};
+						return {
+							$infnan: sign
+						};
 					},
 					fromJSONValue: function (obj) {
 						return obj.$infnan / 0;
 					}
 				},
-				function: {// Function
+				function: {
+					// Function
 					matchJSONValue: function (obj) {
-						return obj.hasOwnProperty('$function') && Object.keys(obj).length === 1;
+						return obj.hasOwnProperty("$function") && Object.keys(obj).length === 1;
 					},
 					matchObject: function (obj) {
 						return typeof obj === "function";
 					},
 					toJSONValue: function (obj) {
-						return {$function: obj.toString()};
+						return {
+							$function: obj.toString()
+						};
 					},
 					fromJSONValue: function (obj) {
 						var matches = obj.$function.match(/^function\s?(\w*)\(([^)]*)\)\s*{([\s\S]*)}$/);
 						var name = matches[1];
 						var args = matches[2];
 						var body = matches[3];
-						//var arr = args.split(",");
-						//arr.push(body);
-						//return Function.apply(null, arr);
+						// var arr = args.split(",");
+						// arr.push(body);
+						// return Function.apply(null, arr);
 
-						//allow named functions
+						// allow named functions
 						return eval("(function(){ return function " + name + "(" + args + "){ " + body + " }; })()");
 					}
 				},
-				escape: {// Function
+				escape: {
+					// ejson
 					matchJSONValue: function (obj) {
-						return obj.hasOwnProperty('$escape') && Object.keys(obj).length === 1;
+						return obj.hasOwnProperty("$escape") && Object.keys(obj).length === 1;
 					},
 					matchObject: function (obj) {
 						for (var i in window.storage.converters) {
@@ -236,7 +291,9 @@
 						for (var i in obj) {
 							newObj[i] = window.storage.stringify(obj[i]);
 						}
-						return {$escape: newObj};
+						return {
+							$escape: newObj
+						};
 					},
 					fromJSONValue: function (obj) {
 						var newObj = {};
@@ -250,10 +307,11 @@
 		},
 		stringify: {
 			value: function (obj) {
-				//check for circular reference.
+				// check for circular reference.
 				if (window.storage.isCyclic(obj)) {
 					throw "Cannot store cyclic objects";
 				}
+
 				function ToStringable(obj) {
 					if (obj !== null) {
 						for (var i in window.storage.converters) {
@@ -269,13 +327,12 @@
 									temp.push(ToStringable(obj[i]));
 								}
 								return temp;
-							} else {
-								var temp = {};
-								for (var i in obj) {
-									temp[i] = ToStringable(obj[i]);
-								}
-								return temp;
 							}
+							var temp = {};
+							for (var i in obj) {
+								temp[i] = ToStringable(obj[i]);
+							}
+							return temp;
 						}
 					}
 					return obj;
@@ -346,7 +403,7 @@
 					var ch = str.charCodeAt(i);
 					if (ch > 0xFF) {
 						throw new Error(
-								"Not ascii. Base64.encode can only take ascii strings.");
+							"Not ascii. Base64.encode can only take ascii strings.");
 					}
 					array[i] = ch;
 				}
@@ -378,25 +435,27 @@
 						c = null;
 						d = null;
 						break;
+					default:
+						throw "This shouldn't happen";
 				}
 			}
 			if (a !== null) {
 				answer.push(BASE_64_CHARS.charAt(a));
 				answer.push(BASE_64_CHARS.charAt(b));
 				if (c === null)
-					answer.push('=');
+					answer.push("=");
 				else
 					answer.push(BASE_64_CHARS.charAt(c));
 				if (d === null)
-					answer.push('=');
+					answer.push("=");
 			}
 			return answer.join("");
 		},
 		decode: function (str) {
 			var len = Math.floor((str.length * 3) / 4);
-			if (str.charAt(str.length - 1) === '=') {
+			if (str.charAt(str.length - 1) === "=") {
 				len--;
-				if (str.charAt(str.length - 2) === '=')
+				if (str.charAt(str.length - 2) === "=")
 					len--;
 			}
 			var arr = new Uint8Array(len);
@@ -413,12 +472,12 @@
 				switch (i % 4) {
 					case 0:
 						if (v < 0)
-							throw new Error('invalid base64 string');
+							throw new Error("invalid base64 string");
 						one = v << 2;
 						break;
 					case 1:
 						if (v < 0)
-							throw new Error('invalid base64 string');
+							throw new Error("invalid base64 string");
 						one = one | (v >> 4);
 						arr[j++] = one;
 						two = (v & 0x0F) << 4;
@@ -435,15 +494,16 @@
 							arr[j++] = three | v;
 						}
 						break;
+					default:
+						throw "This shouldn't happen";
 				}
 			}
 			return arr;
 		}
 	};
 
-	for (var i in localStorage)
-	{
+	for (var i in localStorage) {
 		window.storage.define(i);
 	}
-//TODO: set window.storage.item = {test:""}; with object.observe?
+	// TODO: set window.storage.item = {test:""}; with object.observe?
 })(window);
