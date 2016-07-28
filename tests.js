@@ -1,3 +1,8 @@
+var tests = {
+	passed: 0,
+	failed: 0
+};
+
 function test(name, value, pass) {
 	var stringify = window.storage.stringify(value);
 	var parse = window.storage.parse(stringify);
@@ -14,8 +19,10 @@ function test(name, value, pass) {
 			passing = false;
 		}
 		if (passing) {
+			tests.passed++;
 			console.log("%cPASS", "color: #0f0");
 		} else {
+			tests.failed++;
 			console.error("FAIL");
 		}
 	}
@@ -24,6 +31,7 @@ function test(name, value, pass) {
 test("string", "string", function (test, string, result) {
 	return JSON.stringify(test) === string && test === result;
 });
+
 test("array", [1, 2, 3], function (test, string, result) {
 	var pass = true;
 	if (JSON.stringify(test) !== string) {
@@ -39,6 +47,7 @@ test("array", [1, 2, 3], function (test, string, result) {
 	}
 	return pass;
 });
+
 test("object", {1: 1, 2: 2, 3: 3}, function (test, string, result) {
 	var pass = true;
 	if (JSON.stringify(test) !== string) {
@@ -51,27 +60,35 @@ test("object", {1: 1, 2: 2, 3: 3}, function (test, string, result) {
 	}
 	return pass;
 });
+
 test("number", 1, function (test, string, result) {
 	return test === +string && test === result;
 });
+
 test("nan", window.NaN, function (test, string, result) {
 	return JSON.stringify({$infnan: 0}) === string && typeof result === "number" && isNaN(result);
 });
+
 test("infinity", window.Infinity, function (test, string, result) {
 	return JSON.stringify({$infnan: 1}) === string && test === result;
 });
+
 test("-infinity", -window.Infinity, function (test, string, result) {
 	return JSON.stringify({$infnan: -1}) === string && test === result;
 });
+
 test("date", new Date(), function (test, string, result) {
 	return JSON.stringify({$date: test.getTime()}) === string && test.getTime() === result.getTime();
 });
+
 test("regexp", /i/g, function (test, string, result) {
 	return JSON.stringify({$regexp: test.toString()}) === string && test.toString() === result.toString();
 });
+
 test("undefined", undefined, function (test, string, result) {
 	return JSON.stringify({$undefined: 0}) === string && typeof result === "undefined";
 });
+
 test("named function", function diff_1(a, b) {
 	if (a < b) {
 		return b - a;
@@ -80,22 +97,27 @@ test("named function", function diff_1(a, b) {
 }, function (test, string, result) {
 	return test.name === result.name && JSON.stringify({$function: test.toString()}) === string && result(1, 3) === 2;
 });
+
 test("anonymous function", function (a, b) {
 	return a + b;
 }, function (test, string, result) {
 	return JSON.stringify({$function: test.toString()}) === string && result(1, 2) === 3;
 });
+
 test("arrow function with curlys", (a, b) => {
 	return a + b;
 }, function (test, string, result) {
 	return JSON.stringify({$function: test.toString()}) === string && result(1, 2) === 3;
 });
+
 test("arrow function no curlys", (a, b) => a + b, function (test, string, result) {
 	return JSON.stringify({$function: test.toString()}) === string && result(1, 2) === 3;
 });
+
 test("arrow function no parens", a => a + 1, function (test, string, result) {
 	return JSON.stringify({$function: test.toString()}) === string && result(1) === 2;
 });
+
 test("escape", {$date: 9271384}, function (test, string, result) {
 	var newObj = {};
 	for (var i in test) {
@@ -103,9 +125,11 @@ test("escape", {$date: 9271384}, function (test, string, result) {
 	}
 	return JSON.stringify({$escape: newObj}) === string && test.$date === result.$date;
 });
+
 test("null", null, function (test, string, result) {
 	return "null" === string && test === result;
 });
+
 test("binary", new Uint8Array([72,101,108,108,111]), function (test, string, result) {
 	var pass = true;
 	if (JSON.stringify({$binary: window.storage.base64.encode(test)}) !== string) {
@@ -121,3 +145,6 @@ test("binary", new Uint8Array([72,101,108,108,111]), function (test, string, res
 	}
 	return pass;
 });
+
+console.log("%cPASSED: " + tests.passed, "color: #0f0");
+console.log("%cFAILED: " + tests.failed, "color: #f00");
