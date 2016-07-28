@@ -309,7 +309,7 @@
 						},
 						matchObject: function (obj) {
 							for (var i in storage.converters) {
-								if (storage.converters[i].matchJSONValue(obj)) {
+								if (typeof storage.converters[i].matchJSONValue === "function" && storage.converters[i].matchJSONValue(obj)) {
 									return true;
 								}
 							}
@@ -345,7 +345,7 @@
 						function ToStringable(obj) {
 							if (obj !== null) {
 								for (var i in storage.converters) {
-									if (storage.converters[i].matchObject(obj)) {
+									if (typeof storage.converters[i].matchObject === "function" && typeof storage.converters[i].toJSONValue === "function" && storage.converters[i].matchObject(obj)) {
 										return storage.converters[i].toJSONValue(obj);
 									}
 								}
@@ -377,7 +377,7 @@
 						function ToObject(obj) {
 							if (obj !== null && typeof obj === "object") {
 								for (var i in storage.converters) {
-									if (storage.converters[i].matchJSONValue(obj)) {
+									if (typeof storage.converters[i].matchJSONValue === "function" && typeof storage.converters[i].fromJSONValue === "function" && storage.converters[i].matchJSONValue(obj)) {
 										return storage.converters[i].fromJSONValue(obj);
 									}
 								}
