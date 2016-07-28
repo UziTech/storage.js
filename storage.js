@@ -262,6 +262,16 @@
 					},
 					fromJSONValue: function (obj) {
 						var matches = obj.$function.match(/^function\s?(\w*)\(([^)]*)\)\s*{([\s\S]*)}$/);
+						// check for arrow function
+						if (!matches) {
+							matches = obj.$function.match(/^()\(?([^)=]*)\)?\s*=>\s*([\s\S]*?)\s*$/);
+							var hasCurlys = matches[3].match(/^{([\s\S]*)}$/);
+							if (hasCurlys) {
+								matches[3] = hasCurlys[1];
+							} else {
+								matches[3] = "return " + matches[3];
+							}
+						}
 						var name = matches[1];
 						var args = matches[2];
 						var body = matches[3];

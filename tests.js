@@ -85,6 +85,17 @@ test("anonymous function", function (a, b) {
 }, function (test, string, result) {
 	return JSON.stringify({$function: test.toString()}) === string && result(1, 2) === 3;
 });
+test("arrow function with curlys", (a, b) => {
+	return a + b;
+}, function (test, string, result) {
+	return JSON.stringify({$function: test.toString()}) === string && result(1, 2) === 3;
+});
+test("arrow function no curlys", (a, b) => a + b, function (test, string, result) {
+	return JSON.stringify({$function: test.toString()}) === string && result(1, 2) === 3;
+});
+test("arrow function no parens", a => a + 1, function (test, string, result) {
+	return JSON.stringify({$function: test.toString()}) === string && result(1) === 2;
+});
 test("escape", {$date: 9271384}, function (test, string, result) {
 	var newObj = {};
 	for (var i in test) {
