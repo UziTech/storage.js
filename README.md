@@ -52,3 +52,6 @@ storage.value(i);
 storage[storage.key(i)];
 //returns the ith keys object
 ```
+
+#sessionStorage
+You can use this with sessionStorage as well using storage.session.get/setItem()
