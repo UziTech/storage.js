@@ -4,8 +4,8 @@ var tests = {
 };
 
 function test(name, value, pass) {
-	var stringify = window.storage.stringify(value);
-	var parse = window.storage.parse(stringify);
+	var stringify = window.storage._.stringify(value);
+	var parse = window.storage._.parse(stringify);
 	console.log("%c" + name.toUpperCase(), "color: #00f");
 	console.log("value: ", value);
 	console.log("stringify: ", stringify);
@@ -132,7 +132,7 @@ test("null", null, function (test, string, result) {
 
 test("binary", new Uint8Array([72,101,108,108,111]), function (test, string, result) {
 	var pass = true;
-	if (JSON.stringify({$binary: window.storage.base64.encode(test)}) !== string) {
+	if (JSON.stringify({$binary: window.storage._.base64.encode(test)}) !== string) {
 		pass = false;
 	} else if (test.length !== result.length || !result instanceof window.Uint8Array) {
 		pass = false;
