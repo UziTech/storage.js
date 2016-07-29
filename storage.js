@@ -227,7 +227,7 @@
 								return obj.$infnan / 0;
 							}
 						},
-						function: {
+						functionObj: {
 							// Function
 							matchJSONValue: function (obj) {
 								return obj && obj.hasOwnProperty("$function") && Object.keys(obj).length === 1;
