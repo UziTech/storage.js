@@ -75,7 +75,7 @@
 						if (item instanceof Array) {
 							args = item;
 						} else {
-							args = Array.apply(null, args);
+							args = Array.apply(null, arguments);
 						}
 
 						if (args.length > 1) {
