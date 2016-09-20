@@ -1,7 +1,7 @@
-/*
+/**
  * Author: Tony Brix, https://tony.brix.ninja
  * License: MIT
- * Version: 2.0.0
+ * Version: 2.0.1
  */
 ;
 (function (window) {
@@ -58,6 +58,8 @@
 						var args;
 						if (item instanceof Array) {
 							args = item;
+						} else if (arguments.length === 1) {
+							args = [arguments[0]];
 						} else {
 							args = Array.apply(null, arguments);
 						}
@@ -74,6 +76,8 @@
 						var args;
 						if (item instanceof Array) {
 							args = item;
+						} else if (arguments.length === 1) {
+							args = [arguments[0]];
 						} else {
 							args = Array.apply(null, arguments);
 						}
@@ -301,17 +305,18 @@
 					},
 					jsonValueToObject: function (obj) {
 						if (obj !== null && typeof obj === "object") {
-							for (var i in storage._.converters) {
+							var i;
+							for (i in storage._.converters) {
 								if (typeof storage._.converters[i].matchJSONValue === "function" && typeof storage._.converters[i].fromJSONValue === "function" && storage._.converters[i].matchJSONValue(obj)) {
 									return storage._.converters[i].fromJSONValue(obj);
 								}
 							}
 							if (obj instanceof Array) {
-								for (var i = 0; i < obj.length; i++) {
+								for (i = 0; i < obj.length; i++) {
 									obj[i] = storage._.jsonValueToObject(obj[i]);
 								}
 							} else {
-								for (var i in obj) {
+								for (i in obj) {
 									obj[i] = storage._.jsonValueToObject(obj[i]);
 								}
 							}
@@ -320,7 +325,8 @@
 					},
 					objectToJsonValue: function (obj) {
 						if (obj !== null) {
-							for (var i in storage._.converters) {
+							var i;
+							for (i in storage._.converters) {
 								if (typeof storage._.converters[i].matchObject === "function" && typeof storage._.converters[i].toJSONValue === "function" && storage._.converters[i].matchObject(obj)) {
 									return storage._.converters[i].toJSONValue(obj);
 								}
@@ -329,13 +335,13 @@
 							if (typeof obj === "object") {
 								if (obj instanceof Array) {
 									var tempArr = [];
-									for (var i = 0; i < obj.length; i++) {
+									for (i = 0; i < obj.length; i++) {
 										tempArr.push(storage._.objectToJsonValue(obj[i]));
 									}
 									return tempArr;
 								}
 								var tempObj = {};
-								for (var i in obj) {
+								for (i in obj) {
 									tempObj[i] = storage._.objectToJsonValue(obj[i]);
 								}
 								return tempObj;
@@ -347,6 +353,8 @@
 						var args;
 						if (item instanceof Array) {
 							args = item;
+						} else if (arguments.length === 1) {
+							args = [arguments[0]];
 						} else {
 							args = Array.apply(null, arguments);
 						}
@@ -464,10 +472,11 @@
 
 		var Base64 = {
 			encode: function (array) {
+				var i;
 				if (typeof array === "string") {
 					var str = array;
 					array = new Uint8Array(new ArrayBuffer(str.length));
-					for (var i = 0; i < str.length; i++) {
+					for (i = 0; i < str.length; i++) {
 						var ch = str.charCodeAt(i);
 						if (ch > 0xFF) {
 							throw new Error(
@@ -481,7 +490,7 @@
 				var b = null;
 				var c = null;
 				var d = null;
-				for (var i = 0; i < array.length; i++) {
+				for (i = 0; i < array.length; i++) {
 					switch (i % 3) {
 						case 0:
 							a = (array[i] >> 2) & 0x3F;
@@ -581,10 +590,11 @@
 			}
 		}
 	});
-	for (var i in localStorage) {
+	var i;
+	for (i in localStorage) {
 		storage._.define(i);
 	}
-	for (var i in sessionStorage) {
+	for (i in sessionStorage) {
 		storage.session._.define(i);
 	}
 	window.storage = storage;
