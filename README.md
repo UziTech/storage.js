@@ -54,4 +54,5 @@ storage[storage.key(i)];
 ```
 
 #sessionStorage
+
 You can use this with sessionStorage as well using storage.session.get/setItem()
