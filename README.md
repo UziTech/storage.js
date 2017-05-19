@@ -60,6 +60,10 @@ storage[storage.key(i)];
 //returns the ith keys object
 ```
 
-# sessionStorage
+## sessionStorage
 
 You can use this with sessionStorage as well using storage.session.get/setItem()
+
+# Testing
+
+Go to [test.html](https://rawgit.com/UziTech/storage.js/master/test.html) and open the console
