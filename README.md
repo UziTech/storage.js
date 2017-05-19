@@ -4,7 +4,14 @@ localStorage for objects
 # Overview
 A local storage option that allows storing and retrieving any object, array, function, undefined, regexp, date, string, number, and binary using ejson [http://docs.meteor.com/api/ejson.html]
 
+# Installation
+
+```html
+<script src="\path\to\storage.js"></script>
+```
+
 # Usage
+
 ```javascript
 storage.setItem("a", {this:1});
 //storage.a === {"this": 1}
