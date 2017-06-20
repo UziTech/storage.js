@@ -66,4 +66,4 @@ You can use this with sessionStorage as well using storage.session.get/setItem()
 
 # Testing
 
-Go to [test.html](https://rawgit.com/UziTech/storage.js/master/test.html) and open the console
+For more examples of what objects can be stored go to [the tests](https://storage.js.org/test.html)
