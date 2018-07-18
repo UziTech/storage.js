@@ -399,7 +399,14 @@
 						return JSON.stringify(storage._.objectToJsonValue(obj));
 					},
 					parse: function (str) {
-						return storage._.jsonValueToObject(JSON.parse(str));
+						var obj;
+						try {
+							obj = JSON.parse(str);
+						} catch {
+							// assume str is just a string
+							obj = str;
+						}
+						return storage._.jsonValueToObject(obj);
 					},
 
 					isCyclic: function (obj) {
