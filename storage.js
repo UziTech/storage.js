@@ -617,5 +617,11 @@
 	for (i in sessionStorage) {
 		storage.session._.define(i);
 	}
-	window.storage = storage;
+	Object.defineProperties(window, {
+		storage: {
+			get: function () {
+				return storage;
+			}
+		}
+	});
 })(window);
