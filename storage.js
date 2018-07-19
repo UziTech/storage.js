@@ -1,7 +1,7 @@
 /**
  * Author: Tony Brix, https://tony.brix.ninja
  * License: MIT
- * Version: 2.0.1
+ * Version: 2.1.0
  */
 ;
 (function (window) {
