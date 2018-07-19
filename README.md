@@ -39,7 +39,7 @@ storage.setItem("a", "the", "other", "thing", 4);
 //storage.a === {"this": 3, "that": 3, "the": {"other": {"thing": 4}}}
 
 storage.a = {this: 1, that: 2};
-//only works if "a" was already in local storage
+//storage.a === {"this": 1, "that": 2}
 
 storage.getItem("a");
 storage.a;
