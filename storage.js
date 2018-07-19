@@ -585,9 +585,22 @@
 				return arr;
 			}
 		};
-		// TODO: set storage.item = {test:""}; with object.observe?
 
-		return storage;
+		if (window.Proxy) {
+			return new Proxy(storage, {
+				get: function (target, prop) {
+					if (prop in target || target[prop]) {
+						return target[prop];
+					}
+					return target.getItem(prop);
+				},
+				set: function (target, prop, value) {
+					return target.setItem(prop, value);
+				}
+			});
+		} else {
+			return storage;
+		}
 	}
 	var storage = loadStorage(localStorage);
 	Object.defineProperties(storage, {
