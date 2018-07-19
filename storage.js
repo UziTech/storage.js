@@ -402,7 +402,7 @@
 						var obj;
 						try {
 							obj = JSON.parse(str);
-						} catch {
+						} catch (ex) {
 							// assume str is just a string
 							obj = str;
 						}
