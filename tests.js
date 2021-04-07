@@ -195,7 +195,7 @@
 		return pass;
 	});
 
-	log("PASSED: " + tests.passed, { color: "#0f0" });
-	log("FAILED: " + tests.failed, { color: "#f00" });
+	log("PASSED: " + tests.passed, (tests.passed === 0 ? null : { color: "#0f0" }));
+	log("FAILED: " + tests.failed, (tests.failed === 0 ? null : { color: "#f00" }));
 
 })();
